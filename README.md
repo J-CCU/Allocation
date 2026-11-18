@@ -25,7 +25,16 @@ Keep the terminal window open while you use the app. To stop it, close that wind
 - **Gmail import.** Imports from a Google Takeout `.mbox` export, or fetches mail straight from Gmail over read-only IMAP using an app password. Only mail under labels you map to a distributor, or from a sender domain already known to belong to a distributor, is read.
 - **Product matching.** Each line is matched by manufacturer code family (Pokemon, Magic, Bandai, Panini), then UPC, then the distributor's own SKU. A line that matches nothing becomes a new product, and a keyword dictionary fills in its company, game and category.
 - **Allocation rules.** Weeks run Monday to Sunday. Lines are classed as Allocated or Extras/Restock. Open sales orders count as On order. Orders with no invoice after 120 days become "unfilled". Shipment emails are matched to invoices within 21 days.
-- **Dashboard.** Sections: Needs attention, Who is up, who is down, Allocation over time, Distributors over time, Asked for vs. allocated vs. shipped, Insights, By game, What we did, Set launches, Products, Timeline notes, Shipping and Paperwork coverage. The dashboard can be saved as a self-contained, offline `.html` file with a light/dark theme and tables with CSV download.
+- **Dashboard.** Sections: Needs attention, Who is up, who is down, Allocation over time, What arrived by game and type, Unit types by distributor over time, Distributors over time, Asked for vs. allocated vs. shipped, Insights, By game, What we did, Set launches, Products, Timeline notes, Shipping and Paperwork coverage. A **To do** strip at the top lists what needs you, with a link to each.
+- **Units by type (the default measure).** Units are grouped as ETBs, booster boxes, bundles, collections & tins, decks & precons, sports boxes, blisters & packs, cases (case size not known yet) and supplies. **Units (all)** and **Cost ($)** are the other measures.
+  - **What arrived, by game and type:** a card per game ("12 ETBs · 4 booster boxes · 1 case ..."); click one for a table with each distributor as a row and each type as a column, with totals and CSV download.
+  - **Unit types by distributor over time:** a small stacked chart per distributor, week by week (or month by month), on the same or each its own scale, or the same numbers as a table.
+- **Dashboard file.** Saved as one self-contained, offline `.html` file (data, charts and styling inside, light/dark theme, CSV download). Where scripts do not run (Slack, Gmail or Outlook previews, phone file viewers) it shows a fixed summary instead: the last 13 weeks, units by game and type, and each distributor.
+- **Printing.** **Print ▾** prints what is on screen or every section. Cards run onto the next page instead of leaving blank pages, table headers repeat on each page, and long tables stop at 25 rows on paper (the rest is in the app or the CSV).
+- **Sales and profit (Shopify, read only).** Shopify order lines are matched to tracker products by your choice, then barcode, then title (same game, set and product type). Cost is first in, first out from the distributors' invoice lines; a single pack counts as its fraction of a box, and a display counts as its number of items (standard sizes are used when the name gives none: Pokémon Build & Battle, Booster Bundle and Mini Tin displays 10, Lorcana starter displays 8, Magic Commander displays 4, One Piece double packs 8 and starter decks 6). Supplies are not pooled with card products. No customer details are stored. Uses the same Shopify app login as the CCU Marketing Dashboard (`config.yaml`).
+- **Prices worked out by rules.** An item with no price on its paper is priced from, in order: that distributor's invoices, orders and price lists; a price typed in Review > Prices; other distributors' invoices; the same item under another distributor's name; any order or price list naming it; and last the most similar item (shown as an estimate). Promo and marketing kits count as free; typing 0 marks an item free.
+- **Corrections shared between computers.** Prices, display unit counts, Shopify matches and product details you type are also saved to `Tracker corrections.json` next to the data folder. On startup (and after a rebuild) the tracker fills in any of them this computer does not have yet; what is set locally always wins.
+- **Help page.** The full guide is built in, under **Help**, with a link from each page to its section.
 - **Excel export.** Sheets: About, Weekly by game, Weekly by set, Weekly by product, Line items, Invoices, Coverage, Timeline notes, Missing invoices and Review.
 - **Meeting pack.** A dated folder containing the Excel file, the dashboard HTML, a PDF of the dashboard and a copy of the database.
 - **Rebuild.** Re-reads everything from a Gmail export (and the PDFs already loaded) into a separate database and compares it with your current data. You then switch to the rebuilt data or discard it. Review decisions, receipt dates, manual entries, product edits and re-classifications are carried over.
@@ -67,7 +76,9 @@ The app opens at `http://127.0.0.1:8765/`. If something is already listening on 
 | More > Meeting pack | Build the meeting pack, or export Excel only |
 | More > Manual entry | Enter a document by hand |
 | More > Batches | Import history, and undo an upload |
-| More > Health | Data checks |
+| Sales | What the allocated products sold for on Shopify, and the profit |
+| Help | The built-in guide |
+| More > Health | Data checks, and where the corrections file is |
 | More > Report a problem | Write a note to `Tester notes.txt`. Nothing is sent anywhere. |
 | More > Stop the tracker | Stop the app. Your data is kept. |
 
@@ -113,6 +124,7 @@ The tracker has no config file. Settings such as Gmail label mappings, distribut
 | Environment variable | Purpose |
 |---|---|
 | `TRACKER_DATA` | Use a different data folder instead of the default (for example, for testing). Example: `TRACKER_DATA=/path/to/test-data` |
+| `TRACKER_CORRECTIONS` | Read and write the corrections file at this path instead of next to the data folder |
 
 Default data folder:
 
@@ -138,6 +150,7 @@ These paths are in the data folder:
 | `logs/tracker.log` | Problems and slow pages (rotating 1 MB log, with 5 older copies kept) |
 | `gmail.json` | Gmail address, plus the encrypted app password on Windows if remembered |
 | `edge-profile/` | Separate browser profile used to print the PDF |
+| `../Tracker corrections.json` | Your typed corrections (prices, unit counts, Shopify matches, product details), next to the data folder, for other computers to pick up |
 
 **More > Report a problem** writes `Tester notes.txt` to the folder that contains the data folder (from source, the folder with `Allocation Tracker.py`; for the Mac app, the data folder itself).
 
@@ -187,6 +200,9 @@ The embedded modules:
 | `tracker.ingest` | Import pipeline and duplicate handling |
 | `tracker.emails` / `tracker.gmail` | Takeout `.mbox` import and read-only IMAP fetch |
 | `tracker.products` / `tracker.similar` | Product matching, classification and estimated prices |
+| `tracker.shopify` / `tracker.sales` | Read-only Shopify order pull; matching, FIFO cost and profit |
+| `tracker.corrections` | The corrections file shared between computers |
+| `tracker.md` / `tracker._guide` | The built-in Help page and its guide text |
 | `tracker.allocation` / `tracker.pipeline` | Allocation rules and the recompute steps |
 | `tracker.report` | Shared read-only queries |
 | `tracker.dashboard` / `tracker.ui` | Dashboard HTML and shared styling |

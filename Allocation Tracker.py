@@ -6,7 +6,7 @@ First time only:     python "Allocation Tracker.py" setup      (installs pdfplum
 Everything else:     python "Allocation Tracker.py" --help     (import, recompute, export, pack, rebuild ...)
 
 Data lives in the data/ folder next to this file (TRACKER_DATA=folder uses another one).
-Generated from the tracker/ package by packaging/make_single_file.py on 2026-11-16 (commit 18727f6); edit the package, not this file."""
+Generated from the tracker/ package by packaging/make_single_file.py on 2026-11-18 (commit 2fa790a); edit the package, not this file."""
 import importlib.abc
 import importlib.util
 import linecache
