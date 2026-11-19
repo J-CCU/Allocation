@@ -2,8 +2,6 @@
 
 Distributor allocation tracking for Cash Cards Unlimited, a trading-card business. It is for the people who order from distributors and need to see how much product each one allocated. The tracker reads distributor invoices, sales orders and emails, works out each distributor's allocation week by week, and shows the results on a dashboard in your browser. It can also export an Excel workbook and build a "meeting pack" (Excel, dashboard HTML and PDF) for sharing.
 
-Everything runs on your own computer. The app is a small local web server at `http://127.0.0.1:8765`, the data is a SQLite database, and no AI is used: documents are read with fixed rules for each distributor.
-
 ## Quick start
 
 1. Install Python 3.12 or newer.
